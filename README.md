@@ -60,6 +60,28 @@ of Fantasy Points drafts and 11.4% of Nine Category drafts. The observed
 maximums were 79 and 80 wins respectively; 82–0 remains mathematically
 reachable with a rarer concentration of historically elite spins.
 
+### Calibration distributions
+
+| Fantasy Points record | Random top-five | Strong | Optimizer |
+| --- | ---: | ---: | ---: |
+| 0–19 | 40.2% | 0.0% | 0.0% |
+| 20–39 | 43.2% | 2.4% | 2.4% |
+| 40–59 | 13.6% | 38.0% | 37.4% |
+| 60–74 | 3.0% | 56.4% | 56.8% |
+| 75–81 | 0.0% | 3.2% | 3.4% |
+
+| Nine Category record | Random top-five | Strong | Optimizer |
+| --- | ---: | ---: | ---: |
+| 0–19 | 57.0% | 1.0% | 1.0% |
+| 20–39 | 33.2% | 9.2% | 8.8% |
+| 40–59 | 8.2% | 34.0% | 34.0% |
+| 60–74 | 1.6% | 44.4% | 44.2% |
+| 75–81 | 0.0% | 11.4% | 12.0% |
+
+The separation between random, strong, and optimal play is substantial without
+making elite outcomes routine. Of the three GOAT Lab models, NBA currently has
+the healthiest overall difficulty curve.
+
 ## Data architecture
 
 ```text
