@@ -59,6 +59,42 @@ function optimize(draws: Draw[], players: Player[], mode: Mode) {
   return greedyValue > beam.value ? greedy : beam.picks;
 }
 
+function nbaCoach(picks: Player[], optimal: Player[], draws: Draw[], mode: Mode) {
+  const recordGap = Math.max(0, projectedRecord(optimal, mode) - projectedRecord(picks, mode));
+  const averages = {
+    scoring: picks.reduce((sum, p) => sum + p.ppg, 0) / picks.length,
+    rebounding: picks.reduce((sum, p) => sum + p.rpg, 0) / picks.length,
+    playmaking: picks.reduce((sum, p) => sum + p.apg, 0) / picks.length,
+    defense: picks.reduce((sum, p) => sum + p.spg + p.bpg, 0) / picks.length,
+    shooting: picks.reduce((sum, p) => sum + p.fgPct, 0) / picks.length,
+  };
+  const traits = Object.entries(averages).sort((a, b) => b[1] - a[1]);
+  const normalized = {
+    scoring: averages.scoring / 25,
+    rebounding: averages.rebounding / 8,
+    playmaking: averages.playmaking / 6,
+    defense: averages.defense / 2,
+    shooting: averages.shooting / .5,
+  };
+  const weakest = Object.entries(normalized).sort((a, b) => a[1] - b[1])[0][0];
+  const regrets = draws.map((draw, index) => {
+    const user = picks[index];
+    const alternative = optimal.find((player) => player.team === draw.team && player.season === draw.season);
+    return { user, alternative, gap: user && alternative ? score(alternative, mode) - score(user, mode) : 0 };
+  }).filter((item) => item.user && item.alternative).sort((a, b) => b.gap - a.gap);
+  const regret = regrets[0];
+  const star = [...picks].sort((a, b) => score(b, mode) - score(a, mode))[0];
+  return {
+    headline: recordGap === 0 ? "You built at the optimizer’s level." : `${recordGap} projected ${recordGap === 1 ? "win" : "wins"} separated the two lineups.`,
+    strength: `${star.name} drove the lineup, while ${traits[0][0]} was its clearest collective advantage.`,
+    weakness: `${weakest[0].toUpperCase()}${weakest.slice(1)} was the lineup’s weakest relative category. That imbalance matters more in ${mode === "categories" ? "nine-category scoring" : "a five-player points lineup"}.`,
+    regret: regret && regret.gap > .05
+      ? `The largest swing came on ${regret.user.team} ${regret.user.season}: ${regret.user.name} scored ${regret.gap.toFixed(1)} model points below ${regret.alternative!.name}, who was available on the same spin.`
+      : "No individual choice created a meaningful gap; the two constructions were effectively even.",
+    verdict: recordGap === 0 ? "Championship construction. Your choices survived the full combination check." : recordGap <= 5 ? "A contender with one exploitable lineup imbalance." : "The talent is real, but one costly spin and a category weakness capped the ceiling.",
+  };
+}
+
 export default function NbaLab() {
   const [data, setData] = useState<Dataset | null>(null);
   const [mode, setMode] = useState<Mode>("points");
@@ -90,6 +126,7 @@ export default function NbaLab() {
   const players = data?.seasons ?? [];
   const left = players.find((p) => p.id === compare[0]);
   const right = players.find((p) => p.id === compare[1]);
+  const coach = complete ? nbaCoach(picks, optimal, draws, mode) : null;
 
   const spin = () => setCurrent(drawPool[Math.floor(Math.random() * drawPool.length)]);
   const draft = (player: Player) => {
@@ -128,6 +165,12 @@ export default function NbaLab() {
         <article><small>YOUR FIVE</small><strong>{projectedRecord(picks, mode)}–{82 - projectedRecord(picks, mode)}</strong>{picks.map((p) => <p key={p.id}>{p.name} <span>{p.season}</span></p>)}</article>
         <div className="versus">VS</div>
         <article className="optimal"><small>PERFECT COMBINATION</small><strong>{projectedRecord(optimal, mode)}–{82 - projectedRecord(optimal, mode)}</strong>{optimal.map((p) => <p key={p.id}>{p.name} <span>{p.season}</span></p>)}</article>
+        {coach && <section className="coach-report">
+          <div><small>FILM ROOM</small><h3>{coach.headline}</h3><p>{coach.verdict}</p></div>
+          <article><small>IDENTITY</small><p>{coach.strength}</p></article>
+          <article><small>WEAK LINK</small><p>{coach.weakness}</p></article>
+          <article><small>BIGGEST SWING</small><p>{coach.regret}</p></article>
+        </section>}
         <button className="again" onClick={() => reset()}>RUN IT BACK</button>
       </div>}
       <p className="method">Projected records translate lineup strength into an 82-game expectation with a calibrated logistic curve. They are a comparison model—not a claim that these players literally shared a schedule.</p>

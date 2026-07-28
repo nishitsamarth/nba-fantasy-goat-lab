@@ -66,6 +66,12 @@ h1 em { font-style:normal; color:var(--orange); }
 .results .optimal small,.results .optimal p span { color:var(--ink); }
 .versus { color:var(--gold); font-weight:900; }
 .again { grid-column:1/-1; padding:18px; border:0; background:white; font-weight:900; letter-spacing:.15em; cursor:pointer; }
+.coach-report { grid-column:1/-1; display:grid; grid-template-columns:1.2fr repeat(3,1fr); border:1px solid #555; }
+.coach-report>div,.coach-report>article { min-height:0; padding:28px; border-right:1px solid #555; }
+.coach-report>article:last-child { border-right:0; }
+.coach-report small { color:var(--orange); font-size:9px; font-weight:900; letter-spacing:.16em; }
+.coach-report h3 { font-size:clamp(28px,3vw,44px); line-height:.95; letter-spacing:-.05em; margin:16px 0; }
+.coach-report p { color:#aaa; font-size:12px; line-height:1.55; margin:14px 0 0; }
 .method { color:#888; max-width:800px; line-height:1.5; font-size:12px; margin-top:25px; }
 .compare { padding:110px 5vw; }
 .section-head.light { border-color:#aaa; }
@@ -97,6 +103,8 @@ footer b { font-size:20px; } footer p,footer a { font-size:11px; font-weight:800
   .choices { grid-template-columns:1fr; }
   .spin-panel { padding:25px 14px; }
   .results,.duel,.compare-pickers { grid-template-columns:1fr; }
+  .coach-report { grid-column:auto; grid-template-columns:1fr; }
+  .coach-report>div,.coach-report>article { border-right:0; border-bottom:1px solid #555; }
   .versus { text-align:center; }
   .duel article { padding:25px; }
   footer { display:grid; gap:15px; }

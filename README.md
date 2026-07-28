@@ -22,6 +22,10 @@ rule.
 
 ## Scoring
 
+### Film-room explanation
+
+Completed drafts receive a deterministic lineup diagnosis rather than only a record. The film room describes the five’s strongest collective trait, weakest relative category, largest single decision swing, same-spin alternative, and projected-win cost. The language changes for fantasy-points and nine-category modes and is produced locally without generated text or API calls.
+
 ### Fantasy Points
 
 The transparent per-game formula is:
