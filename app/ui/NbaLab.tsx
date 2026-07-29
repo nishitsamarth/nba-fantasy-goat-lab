@@ -13,15 +13,15 @@ type Player = {
 type Dataset = { generatedAt: string; source: string; seasons: Player[] };
 type Mode = "points" | "categories";
 type Draw = { team: string; season: string };
-type Slot = { key: Role | "wing2"; label: string; role: Role };
+type Slot = { key: Role | "wing2"; label: string; shortLabel: string; role: Role };
 type Pick = { player: Player; slotKey: Slot["key"]; draw: Draw };
 
 const SLOTS: Slot[] = [
-  { key: "guard", label: "Guard", role: "guard" },
-  { key: "wing", label: "Wing 1", role: "wing" },
-  { key: "wing2", label: "Wing 2", role: "wing" },
-  { key: "big", label: "Big", role: "big" },
-  { key: "extra", label: "Extra", role: "extra" },
+  { key: "guard", label: "Guard", shortLabel: "G", role: "guard" },
+  { key: "wing", label: "Wing 1", shortLabel: "W1", role: "wing" },
+  { key: "wing2", label: "Wing 2", shortLabel: "W2", role: "wing" },
+  { key: "big", label: "Big", shortLabel: "B", role: "big" },
+  { key: "extra", label: "Extra", shortLabel: "X", role: "extra" },
 ];
 const CAT_LABELS = ["PTS", "REB", "AST", "STL", "BLK", "3P%", "FG%", "FT%", "TOV"];
 const eligible = (player: Player, slot: Slot) => slot.role === "extra" || player.roles.includes(slot.role);
@@ -178,6 +178,10 @@ export default function NbaLab() {
     return !occupant || occupant.player.id === pick.player.id || eligible(occupant.player, sourceSlot);
   };
   const reset = (nextMode = mode) => { setMode(nextMode); setPicks([]); setDraws([]); setCurrent(null); };
+  const startOver = () => {
+    reset();
+    requestAnimationFrame(() => document.getElementById("draft")?.scrollIntoView({ behavior: "smooth", block: "start" }));
+  };
   if (!data) return <main className="loading">Opening the archive…</main>;
 
   return <main>
@@ -198,9 +202,9 @@ export default function NbaLab() {
       {!complete ? <div className="draft-stage">
         <aside><b>ROUND {picks.length + 1}</b><span>OF 5</span>{SLOTS.map((slot) => {
           const pick = picks.find((item) => item.slotKey === slot.key);
-          return <p key={slot.key}><small>{slot.label}</small>{pick ? <><b>{pick.player.name}</b><select aria-label={`Move ${pick.player.name}`} value={pick.slotKey} onChange={(event) => reassign(pick.player.id, event.target.value as Slot["key"])}>
-            {SLOTS.map((target) => <option key={target.key} value={target.key} disabled={!canReassign(pick, target)}>{target.label}</option>)}
-          </select></> : "OPEN"}</p>;
+          return <p key={slot.key}><small>{slot.label}</small>{pick ? <><b>{pick.player.name}</b><span className="role-switcher" aria-label={`Move ${pick.player.name}`}>
+            {SLOTS.map((target) => <button type="button" key={target.key} aria-label={`Move to ${target.label}`} aria-pressed={pick.slotKey === target.key} className={pick.slotKey === target.key ? "active" : ""} disabled={!canReassign(pick, target)} onClick={() => reassign(pick.player.id, target.key)}>{target.shortLabel}</button>)}
+          </span></> : "OPEN"}</p>;
         })}</aside>
         <div className="spin-panel">
           {!current ? <><span className="ball">?</span><button onClick={spin}>SPIN<br/><small>TEAM + SEASON</small></button></> :
@@ -231,9 +235,9 @@ export default function NbaLab() {
       </div> : <div className="results">
         <article><small>YOUR FIVE</small><strong>{projectedRecord(yourPlayers, mode)}–{82 - projectedRecord(yourPlayers, mode)}</strong>{SLOTS.map((slot) => {
           const pick = picks.find((item) => item.slotKey === slot.key);
-          return <p key={slot.key}><b>{slot.label}</b><span className="result-player">{pick?.player.name}<small>{pick?.player.season}</small>{pick && <select aria-label={`Reassign ${pick.player.name}`} value={pick.slotKey} onChange={(event) => reassign(pick.player.id, event.target.value as Slot["key"])}>
-            {SLOTS.map((target) => <option key={target.key} value={target.key} disabled={!canReassign(pick, target)}>{target.label}</option>)}
-          </select>}</span></p>;
+          return <p key={slot.key}><b>{slot.label}</b><span className="result-player">{pick?.player.name}<small>{pick?.player.season}</small>{pick && <span className="role-switcher" aria-label={`Move ${pick.player.name}`}>
+            {SLOTS.map((target) => <button type="button" key={target.key} aria-label={`Move to ${target.label}`} aria-pressed={pick.slotKey === target.key} className={pick.slotKey === target.key ? "active" : ""} disabled={!canReassign(pick, target)} onClick={() => reassign(pick.player.id, target.key)}>{target.shortLabel}</button>)}
+          </span>}</span></p>;
         })}</article>
         <div className="versus">VS</div>
         <article className="optimal"><small>PERFECT LEGAL FIVE</small><strong>{projectedRecord(optimalPlayers, mode)}–{82 - projectedRecord(optimalPlayers, mode)}</strong>{SLOTS.map((slot) => {
@@ -246,7 +250,7 @@ export default function NbaLab() {
           <article><small>WEAK LINK</small><p>{coach.weakness}</p></article>
           <article><small>BIGGEST SWING</small><p>{coach.regret}</p></article>
         </section>}
-        <button className="again" onClick={() => reset()}>RUN IT BACK</button>
+        <div className="result-reset"><span><small>ANOTHER FIVE?</small><b>Clear the board and draft again.</b></span><button onClick={startOver}>START A NEW DRAFT ↑</button></div>
       </div>}
       <p className="method">A legal five must fill one guard slot, two wing slots, one big slot and one extra slot. Eligibility comes from listed career positions for 98% of the player pool, with primary position taking precedence. A deliberately strict positionless threshold allows rare seasons such as peak LeBron to fit every role without treating playmaking centers as wings. Category Balance mode compares nine available box-score dimensions and penalizes a lineup whose weakest category is badly exposed.</p>
     </section>

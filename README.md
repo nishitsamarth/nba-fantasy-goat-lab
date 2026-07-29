@@ -14,11 +14,13 @@ combines a five-round role draft, two scoring lenses, a lineup optimizer, an
 3. Compare the players using their visible box-score statistics—internal model
    scores are deliberately hidden while drafting.
 4. Pick a qualified player and choose which open lineup role he fills.
-5. Reassign or swap drafted players between any roles for which they remain
-   eligible.
+5. Reassign or swap drafted players with visible role buttons—there are no
+   hidden position menus.
 6. Fill one guard slot, two wing slots, one big slot and one extra slot.
 7. Compare the legal five with the optimizer's best legal combination from the
    identical ordered spins.
+8. Start a new draft from the results screen; the board clears and returns to
+   round one automatically.
 
 One real player may appear only once. Drafting one LeBron James season removes
 every other LeBron season from that draft, and the optimizer obeys the same
